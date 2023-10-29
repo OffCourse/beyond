@@ -1,0 +1,4 @@
+(library
+ (name offcourse)
+ (libraries core)
+)
