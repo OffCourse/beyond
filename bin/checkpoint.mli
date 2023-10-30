@@ -1,5 +1,4 @@
 type t
 
-val create : task:string -> description:string -> t
-val to_yojson : t -> Yojson.Safe.t
-val of_yojson : Yojson.Safe.t -> t Ppx_deriving_yojson_runtime.error_or
+val create : course_id:Uuid.t option -> task:string -> description:string -> t
+val to_yojson : t -> Yojson.Basic.t

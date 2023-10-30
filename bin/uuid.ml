@@ -7,6 +7,7 @@ let generate _ =
   id
 ;;
 
+let to_string uuid = Uuidm.to_string uuid
 let to_yojson uuid = `String (Uuidm.to_string uuid)
 
 let of_yojson json =
