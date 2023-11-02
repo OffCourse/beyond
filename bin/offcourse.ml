@@ -14,6 +14,11 @@ let create ~goal ~curator ~description ~checkpoints =
   { goal; curator; description; id; forked_from = None; checkpoints }
 ;;
 
+let fork ~curator ~offcourse =
+  let id = Uuid.generate () in
+  { offcourse with curator; id; forked_from = Some offcourse.id }
+;;
+
 let get_id t = t.id
 
 let of_yojson json =
@@ -21,20 +26,19 @@ let of_yojson json =
   let goal = json |> member "goal" |> to_string in
   let curator = json |> member "curator" |> to_string in
   let description = json |> member "description" |> to_string in
-  let id = json |> member "id" |> to_string in
   let id =
-    match Uuid.of_yojson id with
+    match json |> member "id" |> to_string |> Uuid.of_yojson with
     | Some id -> id
     | None -> raise (ParseError "Course ID must be set")
   in
-  let forked_from = json |> member "forked_from" |> to_string_option in
   let forked_from =
-    match forked_from with
+    match json |> member "forked_from" |> to_string_option with
     | None -> None
     | Some id -> Uuid.of_yojson id
   in
-  let checkpoints = json |> member "checkpoints" |> to_list in
-  let checkpoints = List.map Checkpoint.of_yojson checkpoints in
+  let checkpoints =
+    json |> member "checkpoints" |> to_list |> List.map Checkpoint.of_yojson
+  in
   { goal; curator; description; id; forked_from; checkpoints }
 ;;
 

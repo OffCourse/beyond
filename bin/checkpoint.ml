@@ -36,6 +36,6 @@ let of_yojson json =
     | Some id -> id
     | None -> raise (ParseError "Checkpoint ID must be set")
   in
-  let link = Link.Url "HELLO" in
+  let link = json |> member "link" |> to_string |> Link.of_yojson in
   { task; description; id; link }
 ;;
