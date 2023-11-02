@@ -1,17 +1,41 @@
+exception ParseError of string
+
 type t =
   { goal : string
+  ; curator : string
   ; description : string
   ; id : Uuid.t
   ; forked_from : Uuid.t option
   ; checkpoints : Checkpoint.t list
   }
 
-let create ~goal ~description ~checkpoints =
+let create ~goal ~curator ~description ~checkpoints =
   let id = Uuid.generate () in
-  { goal; description; id; forked_from = None; checkpoints }
+  { goal; curator; description; id; forked_from = None; checkpoints }
 ;;
 
 let get_id t = t.id
+
+let of_yojson json =
+  let open Yojson.Basic.Util in
+  let goal = json |> member "goal" |> to_string in
+  let curator = json |> member "curator" |> to_string in
+  let description = json |> member "description" |> to_string in
+  let id = json |> member "id" |> to_string in
+  let id =
+    match Uuid.of_yojson id with
+    | Some id -> id
+    | None -> raise (ParseError "Course ID must be set")
+  in
+  let forked_from = json |> member "forked_from" |> to_string_option in
+  let forked_from =
+    match forked_from with
+    | None -> None
+    | Some id -> Uuid.of_yojson id
+  in
+  let checkpoints = [] in
+  { goal; curator; description; id; forked_from; checkpoints }
+;;
 
 let to_yojson t =
   let forked_from =
@@ -22,6 +46,7 @@ let to_yojson t =
   let checkpoints = List.map Checkpoint.to_yojson t.checkpoints in
   `Assoc
     [ "goal", `String t.goal
+    ; "curator", `String t.curator
     ; "description", `String t.description
     ; "id", Uuid.to_yojson t.id
     ; "forked_from", forked_from
