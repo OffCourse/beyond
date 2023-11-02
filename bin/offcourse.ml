@@ -33,7 +33,8 @@ let of_yojson json =
     | None -> None
     | Some id -> Uuid.of_yojson id
   in
-  let checkpoints = [] in
+  let checkpoints = json |> member "checkpoints" |> to_list in
+  let checkpoints = List.map Checkpoint.of_yojson checkpoints in
   { goal; curator; description; id; forked_from; checkpoints }
 ;;
 
